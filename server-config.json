@@ -1,0 +1,4 @@
+{
+    "rateLimitMinutes": 15,
+    "rateLimitRequests": 100
+}
