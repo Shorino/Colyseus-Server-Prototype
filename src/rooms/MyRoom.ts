@@ -1,30 +1,88 @@
+//#region Import libraries
 import http from "http";
 import { Room, Client, ServerError } from "colyseus";
+import { Schema, type, MapSchema } from "@colyseus/schema";
+//#endregion
 
+//#region State
+class PlayerState extends Schema {
+    @type("boolean") connected = true;
+    @type("number") elapsedTime = 0;
+    @type("number") xPos = 0;
+    @type("number") yPos = 0;
+}
+class MyRoomState extends Schema {
+    @type("number") elapsedTime = 0;
+    @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
+}
+//#endregion
+
+//#region Room
 export class MyRoom extends Room {
     // When room is initialized
-    async onCreate (options: any) {
+    onCreate (options: any) {
         console.log("[MyRoom] Room", this.roomId, "created");
+
+        this.setState(new MyRoomState());
+        this.setSimulationInterval((deltaTime) => this.update(deltaTime));
     }
 
     // Authorize client based on provided options before WebSocket handshake is complete
-    async onAuth (client: Client, options: any, request: http.IncomingMessage) {
-        return true;
-        // throw new ServerError(400, "bad access token");
+    onAuth (client: Client, options: any, request: http.IncomingMessage) {
+        console.log("[MyRoom] Room", this.roomId, "is authorizing client", client.sessionId);
+        
+        if(options.password == 123){
+            return true;
+        }
+        else{
+            throw new ServerError(400, "bad access token");
+        }
     }
 
     // When client successfully join the room
-    async onJoin (client: Client, options: any, auth: any) {
-        console.log("[MyRoom] Client", client.id, "joined room", this.roomId);
+    onJoin (client: Client, options: any, auth: any) {
+        console.log("[MyRoom] Client", client.sessionId, "joined room", this.roomId);
+
+        this.state.players.set(client.sessionId, new PlayerState());
     }
 
     // When a client leaves the room
     async onLeave (client: Client, consented: boolean) {
-        console.log("[MyRoom] Client", client.id, "left room", this.roomId);
+        console.log("[MyRoom] Client", client.sessionId, "disconnected from room", this.roomId);
+
+        // flag client as inactive for other users
+        this.state.players.get(client.sessionId).connected = false;
+
+        try {
+            if (consented) {
+                throw new Error("consented leave");
+            }
+
+            // allow disconnected client to reconnect into this room until 20 seconds
+            await this.allowReconnection(client, 20);
+
+            // client returned! let's re-activate it.
+            this.state.players.get(client.sessionId).connected = true;
+
+        } catch (e) {
+            // 20 seconds expired. let's remove the client.
+            this.state.players.delete(client.sessionId);
+            
+            console.log("[MyRoom] Client", client.sessionId, "left room", this.roomId);
+        }
     }
 
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-    async onDispose () {
+    onDispose () {
         console.log("[MyRoom] Room", this.roomId, "disposed");
     }
+
+    // Game loop
+    update(deltaTime){
+        this.state.elapsedTime += deltaTime;
+        this.state.players.forEach((value, key) => {
+            value.elapsedTime += deltaTime;
+        });
+    }
 }
+//#endregion
