@@ -12,7 +12,7 @@ import rateLimit from "express-rate-limit";
 require('dotenv').config({
     path: __dirname + '/.env'
 });
-import config from "../server-config.json";
+import config from "./server-config.json";
 import { MyRoom } from "./rooms/MyRoom";
 //#endregion
 
