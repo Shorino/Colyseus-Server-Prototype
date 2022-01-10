@@ -25,6 +25,7 @@ export class MyRoom extends Room {
 
         this.setState(new MyRoomState());
         this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+        // this.maxClients = 4;
     }
 
     // Authorize client based on provided options before WebSocket handshake is complete

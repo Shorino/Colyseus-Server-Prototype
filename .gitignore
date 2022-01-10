@@ -1,2 +1,4 @@
 node_modules
 dist
+loadtest.log
+loadtest.log.bkp
