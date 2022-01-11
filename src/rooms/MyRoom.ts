@@ -21,7 +21,9 @@ class MyRoomState extends Schema {
 export class MyRoom extends Room {
     // When room is initialized
     onCreate (options: any) {
-        console.log("[MyRoom] Room", this.roomId, "created");
+        console.log("[MyRoom] onCreate:", {
+            "roomId": this.roomId,
+        });
 
         this.setState(new MyRoomState());
         this.setSimulationInterval((deltaTime) => this.update(deltaTime));
@@ -30,8 +32,11 @@ export class MyRoom extends Room {
 
     // Authorize client based on provided options before WebSocket handshake is complete
     onAuth (client: Client, options: any, request: http.IncomingMessage) {
-        console.log("[MyRoom] Room", this.roomId, "is authorizing client", client.sessionId);
-        
+        console.log("[MyRoom] onAuth:", {
+            "roomId": this.roomId,
+            "clientId": client.sessionId,
+        });
+
         if(options.password == 123){
             return true;
         }
@@ -42,14 +47,21 @@ export class MyRoom extends Room {
 
     // When client successfully join the room
     onJoin (client: Client, options: any, auth: any) {
-        console.log("[MyRoom] Client", client.sessionId, "joined room", this.roomId);
+        console.log("[MyRoom] onJoin:", {
+            "roomId": this.roomId,
+            "clientId": client.sessionId,
+        });
 
         this.state.players.set(client.sessionId, new PlayerState());
     }
 
     // When a client leaves the room
     async onLeave (client: Client, consented: boolean) {
-        console.log("[MyRoom] Client", client.sessionId, "disconnected from room", this.roomId);
+        console.log("[MyRoom] onDisconnect:", {
+            "roomId": this.roomId,
+            "clientId": client.sessionId,
+            "consented": consented,
+        });
 
         // flag client as inactive for other users
         this.state.players.get(client.sessionId).connected = false;
@@ -69,13 +81,19 @@ export class MyRoom extends Room {
             // 20 seconds expired. let's remove the client.
             this.state.players.delete(client.sessionId);
             
-            console.log("[MyRoom] Client", client.sessionId, "left room", this.roomId);
+            console.log("[MyRoom] onLeave:", {
+                "roomId": this.roomId,
+                "clientId": client.sessionId,
+                "consented": consented,
+            });
         }
     }
 
     // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
     onDispose () {
-        console.log("[MyRoom] Room", this.roomId, "disposed");
+        console.log("[MyRoom] onDispose:", {
+            "roomId": this.roomId,
+        });
     }
 
     // Game loop

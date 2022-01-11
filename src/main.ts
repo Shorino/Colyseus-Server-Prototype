@@ -60,5 +60,5 @@ gameServer.define("MyRoom", MyRoom);
 
 //#region Listen on port
 gameServer.listen(port);
-console.log(`[GameServer] Listening on port ${port}`);
+console.log(`[GameServer] Listening on port: ${port}`);
 //#endregion
