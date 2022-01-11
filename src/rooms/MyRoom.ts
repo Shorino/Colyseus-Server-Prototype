@@ -23,6 +23,7 @@ export class MyRoom extends Room {
     onCreate (options: any) {
         console.log("[MyRoom] onCreate:", {
             "roomId": this.roomId,
+            "options": options,
         });
 
         this.setState(new MyRoomState());
@@ -35,6 +36,7 @@ export class MyRoom extends Room {
         console.log("[MyRoom] onAuth:", {
             "roomId": this.roomId,
             "clientId": client.sessionId,
+            "options": options,
         });
 
         if(options.password == 123){
@@ -50,6 +52,8 @@ export class MyRoom extends Room {
         console.log("[MyRoom] onJoin:", {
             "roomId": this.roomId,
             "clientId": client.sessionId,
+            "options": options,
+            "auth": auth,
         });
 
         this.state.players.set(client.sessionId, new PlayerState());
