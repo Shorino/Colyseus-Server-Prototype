@@ -16,10 +16,6 @@ import config from "./server-config.json";
 import { MyRoom } from "./rooms/MyRoom";
 //#endregion
 
-//#region Define port
-const port = parseInt(process.env.PORT, 10) || 3000;
-//#endregion
-
 //#region Define basic auth
 const username = process.env.MONITOR_USERNAME || 'admin';
 const password = process.env.MONITOR_PASSWORD || 'admin';
@@ -59,6 +55,6 @@ gameServer.define("MyRoom", MyRoom);
 //#endregion
 
 //#region Listen on port
-gameServer.listen(port);
-console.log(`[GameServer] Listening on port: ${port}`);
+gameServer.listen(config.port);
+console.log(`[GameServer] Listening on port: ${config.port}`);
 //#endregion

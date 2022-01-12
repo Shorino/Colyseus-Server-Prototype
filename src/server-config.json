@@ -1,4 +1,5 @@
 {
+	"port": 3000,
     "rateLimitMinutes": 15,
     "rateLimitRequests": 100
 }
